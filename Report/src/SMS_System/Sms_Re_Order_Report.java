@@ -19,9 +19,6 @@ import Controller.Supplier_Controller;
 import Model.Item;
 import Model.Supplier;
 import com.formdev.flatlaf.FlatLightLaf;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import javax.swing.SwingUtilities;
 
@@ -129,13 +126,11 @@ public class Sms_Re_Order_Report extends javax.swing.JFrame {
             parameters.put("ParameterSupplier", supplier);
             parameters.put("ParameterCategory", category);
 
-            // Debugging output
             System.out.println("File exists: " + new File(jasperFilePath).exists());
 
             InputStream input = new FileInputStream(new File(jasperFilePath));
             JasperDesign myJasperDesign = JRXmlLoader.load(input);
 
-            // Check if connection is closed
             System.out.println("Connection is closed: " + DatabaseConnection.getInstance().getConnection().isClosed());
 
             JasperReport myJasperReport = JasperCompileManager.compileReport(myJasperDesign);
@@ -153,7 +148,6 @@ public class Sms_Re_Order_Report extends javax.swing.JFrame {
                     Preview.repaint();
                 }
             });
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -174,21 +168,6 @@ public class Sms_Re_Order_Report extends javax.swing.JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//          try {
-//            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement("SELECT DISTINCT `Supp_Name` FROM `supplier` ORDER BY `Supp_Name` ASC;");
-//            ResultSet r = p.executeQuery();
-//
-//            while (r.next()) {
-//                String supplier = r.getString("Supp_Name");
-//
-//                cmbSupp.addItem(supplier);
-//            }
-//            r.close();
-//            p.close();
-//        } catch (SQLException ex) {
-//            ex.printStackTrace();
-//        }
     }
 
     public void showCategory() {
@@ -201,21 +180,6 @@ public class Sms_Re_Order_Report extends javax.swing.JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//        try {
-//            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement("SELECT DISTINCT `Cat_Name` FROM `items` ORDER BY `Cat_Name` ASC;");
-//            ResultSet r = p.executeQuery();
-//
-//            while (r.next()) {
-//                String category = r.getString("Cat_Name");
-//
-//                cmbCategory.addItem(category);
-//            }
-//            r.close();
-//            p.close();
-//        } catch (SQLException ex) {
-//            ex.printStackTrace();
-//        }
     }
 
     public static void main(String args[]) {

@@ -14,23 +14,28 @@ import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import net.sf.jasperreports.swing.JRViewer;
 import Connection.DatabaseConnection;
-import Controller.Item_Controller;
-import Controller.Supplier_Controller;
-import Model.Item;
-import Model.Supplier;
+import Controller.Employee_Controller;
+import Controller.JobType_Controller;
+import Model.Employee;
+import Model.JobType;
 import com.formdev.flatlaf.FlatLightLaf;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 
-public class Sms_Re_Order_Report extends javax.swing.JFrame {
+public class Commission_Report extends javax.swing.JFrame {
 
-    public Sms_Re_Order_Report() {
-        initComponents();
-        showSupp();
-        showCategory();
+    public Commission_Report() {
+        try {
+            initComponents();
+            DatabaseConnection.getInstance().getConnection();
+            showEmp();
+            showJob();
+        } catch (SQLException ex) {
+            Logger.getLogger(Commission_Report.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -39,9 +44,9 @@ public class Sms_Re_Order_Report extends javax.swing.JFrame {
 
         Preview = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        cmbSupp = new javax.swing.JComboBox<>();
+        cmbEmp = new javax.swing.JComboBox<>();
         jLabel2 = new javax.swing.JLabel();
-        cmbCategory = new javax.swing.JComboBox<>();
+        cmbJob = new javax.swing.JComboBox<>();
         btnFind = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -67,10 +72,10 @@ public class Sms_Re_Order_Report extends javax.swing.JFrame {
         );
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel1.setText("SUPPLIER NAME");
+        jLabel1.setText("EMPLOYEE");
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel2.setText("CATEGORY");
+        jLabel2.setText("JOB TYPE");
 
         btnFind.setBackground(new java.awt.Color(0, 102, 204));
         btnFind.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -91,11 +96,11 @@ public class Sms_Re_Order_Report extends javax.swing.JFrame {
                 .addGap(17, 17, 17)
                 .addComponent(jLabel1)
                 .addGap(18, 18, 18)
-                .addComponent(cmbSupp, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cmbEmp, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel2)
                 .addGap(18, 18, 18)
-                .addComponent(cmbCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cmbJob, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnFind, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -106,9 +111,9 @@ public class Sms_Re_Order_Report extends javax.swing.JFrame {
                 .addGap(14, 14, 14)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(cmbSupp, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbEmp, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2)
-                    .addComponent(cmbCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbJob, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnFind, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(Preview, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -121,21 +126,22 @@ public class Sms_Re_Order_Report extends javax.swing.JFrame {
     private void btnFindActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFindActionPerformed
         try {
             Map<String, Object> parameters = new HashMap<>();
-            String jasperFilePath = "JasperReport/LowStock.jrxml";
+            String jasperFilePath = "JasperReport/Commision.jrxml";
 
-            String supplier = cmbSupp.getSelectedItem().toString();
-            String category = cmbCategory.getSelectedItem().toString();
+            String cEmployee = cmbEmp.getSelectedItem().toString();
+            String cJob_Type = cmbJob.getSelectedItem().toString();
+            
+            System.out.println(cEmployee);
+            System.out.println(cJob_Type);
+            
+            parameters.put("Employee", cEmployee);
+            parameters.put("Job_Type", cJob_Type);
 
-            parameters.put("ParameterSupplier", supplier);
-            parameters.put("ParameterCategory", category);
-
-            // Debugging output
             System.out.println("File exists: " + new File(jasperFilePath).exists());
 
             InputStream input = new FileInputStream(new File(jasperFilePath));
             JasperDesign myJasperDesign = JRXmlLoader.load(input);
 
-            // Check if connection is closed
             System.out.println("Connection is closed: " + DatabaseConnection.getInstance().getConnection().isClosed());
 
             JasperReport myJasperReport = JasperCompileManager.compileReport(myJasperDesign);
@@ -153,69 +159,38 @@ public class Sms_Re_Order_Report extends javax.swing.JFrame {
                     Preview.repaint();
                 }
             });
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }//GEN-LAST:event_btnFindActionPerformed
-
+                
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
 //        showSupp();
-        showCategory();
+        showJob();
     }//GEN-LAST:event_formWindowOpened
 
-    public void showSupp() {
+    public void showEmp() {
         try {
-            Supplier_Controller supp_Controller = new Supplier_Controller();
-            List<Supplier> suppliers = supp_Controller.getSupplier();
-            for (Supplier supplier : suppliers) {
-                cmbSupp.addItem(supplier.getSupp_Name());
+            Employee_Controller emp_Controller = new Employee_Controller();
+            List<Employee> employees = emp_Controller.getEmployee();
+            for (Employee employee : employees) {
+                cmbEmp.addItem(employee.getFname());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//          try {
-//            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement("SELECT DISTINCT `Supp_Name` FROM `supplier` ORDER BY `Supp_Name` ASC;");
-//            ResultSet r = p.executeQuery();
-//
-//            while (r.next()) {
-//                String supplier = r.getString("Supp_Name");
-//
-//                cmbSupp.addItem(supplier);
-//            }
-//            r.close();
-//            p.close();
-//        } catch (SQLException ex) {
-//            ex.printStackTrace();
-//        }
     }
 
-    public void showCategory() {
+    public void showJob() {
         try {
-            Item_Controller controller = new Item_Controller();
-            List<Item> categories = controller.getItem();
-            for (Item category : categories) {
-                cmbCategory.addItem(category.getCategory());
+            JobType_Controller controller = new JobType_Controller();
+            List<JobType> job = controller.getJobType();
+            for (JobType jobtype : job) {
+                cmbJob.addItem(jobtype.getJobType());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//        try {
-//            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement("SELECT DISTINCT `Cat_Name` FROM `items` ORDER BY `Cat_Name` ASC;");
-//            ResultSet r = p.executeQuery();
-//
-//            while (r.next()) {
-//                String category = r.getString("Cat_Name");
-//
-//                cmbCategory.addItem(category);
-//            }
-//            r.close();
-//            p.close();
-//        } catch (SQLException ex) {
-//            ex.printStackTrace();
-//        }
     }
 
     public static void main(String args[]) {
@@ -227,7 +202,7 @@ public class Sms_Re_Order_Report extends javax.swing.JFrame {
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Sms_Re_Order_Report().setVisible(true);
+                new Commission_Report().setVisible(true);
             }
         });
     }
@@ -235,8 +210,8 @@ public class Sms_Re_Order_Report extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Preview;
     private javax.swing.JButton btnFind;
-    private javax.swing.JComboBox<String> cmbCategory;
-    private javax.swing.JComboBox<String> cmbSupp;
+    private javax.swing.JComboBox<String> cmbEmp;
+    private javax.swing.JComboBox<String> cmbJob;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     // End of variables declaration//GEN-END:variables

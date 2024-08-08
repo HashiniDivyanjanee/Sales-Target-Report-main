@@ -1,7 +1,8 @@
 package Controller;
 
-import Model.Supplier;
+
 import Connection.DatabaseConnection;
+import Model.Employee;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -9,22 +10,22 @@ import java.util.List;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-public class Supplier_Controller {
-    public List<Supplier> getSupplier()throws SQLException{
+public class Employee_Controller {
+    public List<Employee> getEmployee()throws SQLException{
         
-        String sql = "SELECT DISTINCT `Supp_Name` FROM `supplier` ORDER BY `Supp_Name` ASC;";
-        List <Supplier> suppliers = new ArrayList<>();
+        String sql = "SELECT DISTINCT `Fname` FROM `employee` ORDER BY `Fname` ASC;";
+        List <Employee> employees = new ArrayList<>();
         
         try (Connection connection = DatabaseConnection.getInstance().getConnection(); Statement stmt = connection.createStatement(); ResultSet result = stmt.executeQuery(sql)){
             
             while(result.next()){
-                Supplier supp = new Supplier();
-                supp.setSupp_Name(result.getString("Supp_Name"));
-                suppliers.add(supp);
+                Employee emp = new Employee();
+                emp.setFname(result.getString("Fname"));
+                employees.add(emp);
             }           
         } catch (Exception e) {
             
         }
-        return suppliers;       
+        return employees;       
     };
 }

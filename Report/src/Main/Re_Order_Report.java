@@ -1,8 +1,6 @@
 package Main;
 
 import java.awt.BorderLayout;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -128,7 +126,6 @@ public class Re_Order_Report extends javax.swing.JFrame {
         parameters.put("ParameterSupplier", supplier);
         parameters.put("ParameterCategory", category);
 
-        // Load the jrxml file from the classpath
         InputStream input = getClass().getClassLoader().getResourceAsStream(jasperFilePath);
         if (input == null) {
             throw new FileNotFoundException("File not found in classpath: " + jasperFilePath);
@@ -136,7 +133,6 @@ public class Re_Order_Report extends javax.swing.JFrame {
 
         JasperDesign myJasperDesign = JRXmlLoader.load(input);
 
-        // Check if connection is closed
         System.out.println("Connection is closed: " + DatabaseConnection.getInstance().getConnection().isClosed());
 
         JasperReport myJasperReport = JasperCompileManager.compileReport(myJasperDesign);
@@ -144,11 +140,10 @@ public class Re_Order_Report extends javax.swing.JFrame {
 
         JRViewer jr = new JRViewer(myJasperPrint);
 
-        // Ensure GUI updates are on the EDT
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                Preview.removeAll();  // Remove any existing content
+                Preview.removeAll();
                 Preview.setLayout(new BorderLayout());
                 Preview.add(jr, BorderLayout.CENTER);
                 Preview.revalidate();
@@ -157,7 +152,7 @@ public class Re_Order_Report extends javax.swing.JFrame {
         });
 
     } catch (Exception e) {
-        e.printStackTrace(); // Print stack trace for more detailed error information
+        e.printStackTrace();
         JOptionPane.showMessageDialog(null, e);
     }
     }//GEN-LAST:event_btnFindActionPerformed
@@ -176,22 +171,7 @@ public class Re_Order_Report extends javax.swing.JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
-//        try {
-//            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement("SELECT DISTINCT `Supp_Name` FROM `supplier` ORDER BY `Supp_Name` ASC;");
-//            ResultSet r = p.executeQuery();
-//
-//            while (r.next()) {
-//                String supplier = r.getString("Supp_Name");
-//
-//                cmbSupp.addItem(supplier);
-//            }
-//            r.close();
-//            p.close();
-//        } catch (SQLException ex) {
-//            ex.printStackTrace();
-//        }
 
     public void showCategory() {
         try {
@@ -204,26 +184,10 @@ public class Re_Order_Report extends javax.swing.JFrame {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error loading categories: " + e.getMessage());
         }
-
-//    try {
-//            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement("SELECT DISTINCT `Cat_Name` FROM `items` ORDER BY `Cat_Name` ASC;");
-//            ResultSet r = p.executeQuery();
-//
-//            while (r.next()) {
-//                String category = r.getString("Cat_Name");
-//
-//                cmbCategory.addItem(category);
-//            }
-//            r.close();
-//            p.close();
-//        } catch (SQLException ex) {
-//            ex.printStackTrace();
-//        }
     }
 
     public static void main(String args[]) {
         try {
-
             FlatLightLaf.setup();
         } catch (Exception e) {
             e.printStackTrace();

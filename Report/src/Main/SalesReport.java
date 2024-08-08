@@ -33,15 +33,18 @@ public class SalesReport extends javax.swing.JFrame {
     public SalesReport() {
 
         //Start Database Connection
-        try {
+       
+        //End Database Connection
+
+        initComponents();
+        
+         try {
            DatabaseConnection databaseConnection = DatabaseConnection.getInstance();
             Connection connection = databaseConnection.getConnection();
         } catch (SQLException ex) {
             Logger.getLogger(CompanyWise.class.getName()).log(Level.SEVERE, null, ex);
         }
-        //End Database Connection
-
-        initComponents();
+        
         setBackground(Color.white);
         barChart();
         lineChart();

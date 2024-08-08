@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2939d13d-b61c-4a1c-b22f-91bfbbb7b9ff">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SMS Database"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="Employee" class="java.lang.String"/>
+	<parameter name="Job_Type" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT 
+    ajc.Job_Number, 
+    ajc.Created_Emp_ID, 
+    ajc.Job_Type, 
+    ajc.Sub_Total,
+    ajc.Date, 
+    CASE 
+        WHEN e.EmpID_auto IS NOT NULL THEN e.Fname 
+        ELSE ajc.Assigned_emp_Id 
+    END AS Assigned_emp_Id,
+    SUM(jcm.LineTotal) AS Services,
+    SUM(jcp.Line_Total) AS Spare,
+    SUM(CASE 
+            WHEN jcp.Eng_Name IN ('Lath Work Charges', 'Welding Work Charges', 'Fork Aliment Charges', 'Wheel Aliment Charges', 
+                                  'Valve Guide', 'Reborring', 'Rod Fiting', 'Pistion Rings', 'Rod Kit', 'Painting Charges', 
+                                  'Fiber Charges', 'Tyre Replacing Charges', 'Alloywheel Repair Charges', 'Apply Double gum', 
+                                  'Body Wash', 'Emission Test') 
+            THEN jcp.Line_Total 
+            ELSE 0 
+        END) AS ExtraJob,
+    SUM(jcp.Line_Total) - SUM(CASE 
+            WHEN jcp.Eng_Name IN ('Lath Work Charges', 'Welding Work Charges', 'Fork Aliment Charges', 'Wheel Aliment Charges', 
+                                  'Valve Guide', 'Reborring', 'Rod Fiting', 'Pistion Rings', 'Rod Kit', 'Painting Charges', 
+                                  'Fiber Charges', 'Tyre Replacing Charges', 'Alloywheel Repair Charges', 'Apply Double gum', 
+                                  'Body Wash', 'Emission Test') 
+            THEN jcp.Line_Total 
+            ELSE 0 
+        END) AS SpareParts,
+    ROUND(
+        (SUM(jcm.LineTotal) + SUM(jcp.Line_Total) - SUM(CASE 
+            WHEN jcp.Eng_Name IN ('Lath Work Charges', 'Welding Work Charges', 'Fork Aliment Charges', 'Wheel Aliment Charges', 
+                                  'Valve Guide', 'Reborring', 'Rod Fiting', 'Pistion Rings', 'Rod Kit', 'Painting Charges', 
+                                  'Fiber Charges', 'Tyre Replacing Charges', 'Alloywheel Repair Charges', 'Apply Double gum', 
+                                  'Body Wash', 'Emission Test') 
+            THEN jcp.Line_Total 
+            ELSE 0 
+        END)) * 0.01, 2 
+    ) AS Commission
+FROM 
+    a_job_card ajc
+JOIN 
+    job_card_maintenance jcm ON ajc.Job_Number = jcm.Job_Custom_ID
+JOIN 
+    job_card_parts jcp ON ajc.Job_Number = jcp.Job_Custom_ID
+LEFT JOIN 
+    employee e ON ajc.Assigned_emp_Id = e.EmpID_auto
+WHERE 
+    ajc.Job_Type =$P{Job_Type} OR e.Fname =$P{Employee} 
+GROUP BY 
+    ajc.Job_Number, 
+    ajc.Created_Emp_ID, 
+    ajc.Job_Type, 
+    ajc.Sub_Total,
+    ajc.Date,
+    CASE 
+        WHEN e.EmpID_auto IS NOT NULL THEN e.Fname 
+        ELSE ajc.Assigned_emp_Id 
+    END
+ORDER BY 
+    ajc.Job_Number DESC;]]>
+	</queryString>
+	<field name="Job_Number" class="java.lang.String"/>
+	<field name="Assigned_emp_Id" class="java.lang.String"/>
+	<field name="Job_Type" class="java.lang.String"/>
+	<field name="Date" class="java.lang.String"/>
+	<field name="Sub_Total" class="java.lang.Double"/>
+	<field name="Services" class="java.lang.Double"/>
+	<field name="SpareParts" class="java.lang.Double"/>
+	<field name="ExtraJob" class="java.lang.Double"/>
+	<field name="Commission" class="java.lang.Double"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="51" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="4" width="802" height="43" uuid="a22dfcea-abd3-4362-b1ae-ed28810b1f7f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COMMISSION REPORT]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="42" splitType="Stretch">
+			<staticText>
+				<reportElement x="24" y="6" width="96" height="30" uuid="b079781b-b74b-411c-9e6c-7299e9711979">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7002f752-a60c-476b-8fc4-c9401f789354"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="2.25" lineStyle="Dotted"/>
+					<leftPen lineColor="#FFFFFF"/>
+					<rightPen lineColor="#FFFFFF"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Job Number]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="121" y="6" width="86" height="30" uuid="14e53a82-5c13-4bf6-a6dc-5593ea379181">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="98d4dcaf-562b-4440-b339-4fc06d4db3ee"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Dotted"/>
+					<topPen lineWidth="2.25"/>
+					<leftPen lineWidth="2.25" lineColor="#FFFFFF"/>
+					<bottomPen lineWidth="2.25"/>
+					<rightPen lineWidth="2.25" lineColor="#FFFFFF"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Employee]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="207" y="6" width="92" height="30" uuid="2b60d4d4-b69a-4fd1-a994-1447fa5b11a7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f200d6ee-2aa5-43c5-aec6-e3702d578c8c"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="2.25" lineStyle="Dotted"/>
+					<bottomPen lineWidth="2.25" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Job Type]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="299" y="6" width="60" height="30" uuid="7ebb0048-e2fa-42db-8217-97e638b41040">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="23b7c04f-3f89-41d9-9f91-aba36cea4583"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="2.25" lineStyle="Dotted"/>
+					<bottomPen lineWidth="2.25" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="359" y="6" width="91" height="30" uuid="67deadff-18d2-4099-90ed-4662a01413f4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4c90dcda-3194-44f0-9c22-5652b6f091c8"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="2.25" lineStyle="Dotted"/>
+					<topPen lineWidth="2.25" lineStyle="Dotted" lineColor="#030303"/>
+					<leftPen lineColor="#FFFFFF"/>
+					<bottomPen lineWidth="2.25" lineStyle="Dotted" lineColor="#030303"/>
+					<rightPen lineColor="#FFFFFF"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sub Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="450" y="6" width="95" height="30" uuid="2ee63add-85e4-4579-923d-6151e6e7ebed"/>
+				<box>
+					<topPen lineWidth="2.25" lineStyle="Dotted"/>
+					<bottomPen lineWidth="2.25" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Spare Parts]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="545" y="6" width="80" height="30" uuid="4bd9f4d8-28af-40d8-a585-a26873a37ae8"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+					<topPen lineWidth="2.25" lineStyle="Dotted"/>
+					<leftPen lineColor="#FFFFFF"/>
+					<bottomPen lineWidth="2.25" lineStyle="Dotted"/>
+					<rightPen lineColor="#FFFFFF"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Service]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="625" y="6" width="80" height="30" uuid="c0efd7b6-8205-42bb-a7de-f454bd350778"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+					<topPen lineWidth="2.25" lineStyle="Dotted"/>
+					<leftPen lineColor="#FFFFFF"/>
+					<bottomPen lineWidth="2.25" lineStyle="Dotted"/>
+					<rightPen lineColor="#FFFFFF"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Extra Job]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="705" y="6" width="80" height="30" uuid="1daf8978-384a-4ec3-a8bb-94a03c3125b6"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+					<topPen lineWidth="2.25" lineStyle="Dotted"/>
+					<leftPen lineColor="#FFFFFF"/>
+					<bottomPen lineWidth="2.25" lineStyle="Dotted"/>
+					<rightPen lineColor="#FFFFFF"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Comission]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="35" splitType="Stretch">
+			<textField>
+				<reportElement x="24" y="-1" width="97" height="30" uuid="c6565262-9b2f-4c81-a5ef-0ff232d784eb">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7002f752-a60c-476b-8fc4-c9401f789354"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{Job_Number}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="121" y="-1" width="86" height="30" uuid="27c53d27-cfef-4a34-baee-bbb0011e706d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="98d4dcaf-562b-4440-b339-4fc06d4db3ee"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{Assigned_emp_Id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="207" y="-1" width="83" height="30" uuid="d469ca47-05b0-4774-b8b2-45514447ab80">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f200d6ee-2aa5-43c5-aec6-e3702d578c8c"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{Job_Type}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="299" y="-1" width="60" height="30" uuid="b7566c3e-11fd-4d44-8eb9-d5f82e37e3c4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="23b7c04f-3f89-41d9-9f91-aba36cea4583"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{Date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="359" y="0" width="51" height="29" uuid="408f4afa-cebf-4fa3-baa4-c0abfa24a3c4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4c90dcda-3194-44f0-9c22-5652b6f091c8"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{Sub_Total}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="545" y="0" width="55" height="29" uuid="7f6326c0-21e7-411a-9c14-21a13ae4d043">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f4ae3e6b-57e3-4cd6-83d8-8dd27acbae8d"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{Services}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="450" y="0" width="60" height="30" uuid="da7785fb-e518-4ae7-aaf9-92bfd987d889">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="302994c5-bb64-448a-b20e-af58cf094c39"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SpareParts}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="625" y="-1" width="65" height="30" uuid="44cdabc5-ac64-42a8-a8f3-8d6976229bdb">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="37c09b60-c58e-46e7-86be-d0e00c60f554"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ExtraJob}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="710" y="0" width="65" height="30" uuid="ad9fea81-5ccf-408e-af6c-c44d00d820e7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9a0d0ae1-34c8-45ad-9279-0eaf189a2df3"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{Commission}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="41" splitType="Stretch">
+			<textField>
+				<reportElement x="310" y="5" width="100" height="30" uuid="c635d9c1-4589-4d4b-9cdd-4503106ef1e7"/>
+				<textElement textAlignment="Right" verticalAlignment="Top"/>
+				<textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="410" y="5" width="100" height="30" uuid="bfaa23e7-32f0-4d73-b404-34c7783917f3"/>
+				<textElement textAlignment="Left" verticalAlignment="Top"/>
+				<textFieldExpression><![CDATA[" of " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>
