@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Commission_Job_Type_Wise" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="fff885ec-2646-4b51-95f4-4062d949b82d">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SMS Database"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="first_Date" class="java.lang.String"/>
+	<parameter name="second_Date" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT 
+    employee.Fname,
+    task1.Emp_Id,
+    employee.SalesTarget,
+    a_job_card.Job_Type,
+    SUM(a_job_card.Sub_Total) - SUM(invoice.Discount) AS subTotal,
+    SUM(invoice.Total) AS sub,
+    SUM(jcm.service) AS service,
+    SUM(jcp.spare) AS spare,
+    ROUND(COALESCE(SUM(jcm1.Extra_Job), 0), 2) AS Extra_Job,
+    ROUND(COALESCE(SUM(jcm2.Services), 0), 2) AS Services1
+FROM
+    `fsms-data`.a_job_card
+        LEFT JOIN
+    invoice ON a_job_card.Job_Number = invoice.JobID
+        LEFT JOIN
+    a_job_task task1 ON a_job_card.auto_id = task1.job_id
+        LEFT JOIN
+    employee ON task1.Emp_Id = employee.EmpID
+        LEFT JOIN
+    (SELECT 
+        SUM(Line_Total) AS spare, Job_Custom_ID
+    FROM
+        job_card_parts
+    GROUP BY Job_Custom_ID) jcp ON invoice.JobID = jcp.Job_Custom_ID
+        LEFT JOIN
+    (SELECT 
+        SUM(LineTotal) AS service, Job_Custom_ID
+    FROM
+        job_card_maintenance
+    GROUP BY Job_Custom_ID) jcm ON invoice.JobID = jcm.Job_Custom_ID
+        LEFT JOIN
+    (SELECT 
+        Job_Custom_ID, SUM(LineTotal) AS Extra_Job
+    FROM
+        job_card_maintenance
+    WHERE
+        ItemName LIKE '%[N00]%'
+    GROUP BY Job_Custom_ID) jcm1 ON a_job_card.Job_Number = jcm1.Job_Custom_ID
+        LEFT JOIN
+    (SELECT 
+        Job_Custom_ID, SUM(LineTotal) AS Services
+    FROM
+        job_card_maintenance
+    WHERE
+        ItemName NOT LIKE '%[N00]%'
+    GROUP BY Job_Custom_ID) jcm2 ON a_job_card.Job_Number = jcm2.Job_Custom_ID
+WHERE
+    invoice.Date BETWEEN $P{first_Date}  AND $P{second_Date} 
+GROUP BY a_job_card.Job_Type , task1.Emp_Id
+ORDER BY task1.Emp_Id DESC]]>
+	</queryString>
+	<field name="Job_Type" class="java.lang.String"/>
+	<field name="Fname" class="java.lang.String"/>
+	<field name="subTotal" class="java.lang.Double"/>
+	<field name="Services1" class="java.lang.Double"/>
+	<field name="Extra_Job" class="java.lang.Double"/>
+	<field name="spare" class="java.lang.Double"/>
+	<field name="SalesTarget" class="java.lang.Double"/>
+	<field name="Emp_Id" class="java.lang.String"/>
+	<sortField name="Fname"/>
+	<variable name="CommissionSum" class="java.lang.Double" resetType="Group" resetGroup="Employee">
+		<variableExpression><![CDATA[($V{Sub}-$V{Extra})*0.01]]></variableExpression>
+	</variable>
+	<variable name="Spare" class="java.lang.Double" resetType="Group" resetGroup="Employee" calculation="Sum">
+		<variableExpression><![CDATA[$F{spare}]]></variableExpression>
+	</variable>
+	<variable name="Extra" class="java.lang.Double" resetType="Group" resetGroup="Employee" calculation="Sum">
+		<variableExpression><![CDATA[$F{Extra_Job}]]></variableExpression>
+	</variable>
+	<variable name="Services" class="java.lang.Double" resetType="Group" resetGroup="Employee" calculation="Sum">
+		<variableExpression><![CDATA[$F{Services1}]]></variableExpression>
+	</variable>
+	<variable name="Sub" class="java.lang.Double" resetType="Group" resetGroup="Employee" calculation="Sum">
+		<variableExpression><![CDATA[$F{subTotal}]]></variableExpression>
+	</variable>
+	<variable name="Target" class="java.lang.Double" resetType="Group" resetGroup="Employee">
+		<variableExpression><![CDATA[($V{Sub}-$V{Extra})-$F{SalesTarget}]]></variableExpression>
+	</variable>
+	<variable name="Presentage" class="java.lang.Double" resetType="Group" resetGroup="Employee">
+		<variableExpression><![CDATA[$V{Target}*0.01]]></variableExpression>
+	</variable>
+	<variable name="total" class="java.lang.Double" resetType="Group" resetGroup="Employee">
+		<variableExpression><![CDATA[$V{Sub}-$V{Extra}]]></variableExpression>
+	</variable>
+	<variable name="comm" class="java.lang.Double" resetType="Group" resetGroup="Employee">
+		<variableExpression><![CDATA[($F{subTotal}-$F{Extra_Job})*0.01]]></variableExpression>
+	</variable>
+	<group name="Employee" keepTogether="true">
+		<groupExpression><![CDATA[$F{Fname}]]></groupExpression>
+		<groupHeader>
+			<band height="56">
+				<textField>
+					<reportElement mode="Opaque" x="-9" y="10" width="240" height="30" forecolor="#FFFFFF" backcolor="#308E91" uuid="70f61ffd-5571-4ab6-b716-afe6081dd2b4"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="14" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{Fname}==null||$F{Fname}.equals("null")? "Not Found":$F{Fname}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="60">
+				<staticText>
+					<reportElement key="" mode="Opaque" x="-11" y="8" width="573" height="42" forecolor="#FFFFFF" backcolor="#308E91" uuid="5431d511-e22a-4d64-b3da-7df555a267ed"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="20" isBold="true"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<textField pattern="#,##0.00">
+					<reportElement x="83" y="14" width="80" height="30" forecolor="#FFFFFF" uuid="4eb84838-1e01-4c6d-910b-4d837c4f53da"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Sub}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement x="187" y="14" width="70" height="30" forecolor="#FFFFFF" uuid="82079155-74ee-46ed-bc05-662162ca7c4c"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Services}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement x="273" y="14" width="68" height="30" forecolor="#FFFFFF" uuid="26fbcd6c-d881-449f-a981-07892fac9b00"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Extra}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement x="357" y="14" width="102" height="30" forecolor="#FFFFFF" uuid="289c9e4c-d34c-4dd5-867d-8381863bbd0f"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Spare}==null||$V{Spare}.equals("null")? 0:$V{Spare}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement x="459" y="14" width="80" height="30" forecolor="#FFFFFF" uuid="e9a56980-97e2-4bb9-b5b6-6420a6793b70"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($V{Sub}-$V{Extra})*0.01]]></textFieldExpression>
+				</textField>
+			</band>
+			<band height="112">
+				<staticText>
+					<reportElement key="" mode="Opaque" x="270" y="2" width="292" height="100" forecolor="#FFFFFF" backcolor="#CBEEF2" uuid="43c25ad9-5c3a-4229-9622-0dca872190cd"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="20" isBold="true"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="296" y="11" width="60" height="20" forecolor="#3D3D3D" uuid="2097c593-3331-4b5d-b81f-cbff303a79f3"/>
+					<textElement>
+						<font size="12" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="296" y="32" width="130" height="20" forecolor="#3D3D3D" uuid="11eefbeb-0658-44da-bce8-328f4cb0131a"/>
+					<textElement>
+						<font size="12" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Employee Target]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="296" y="52" width="130" height="20" forecolor="#3D3D3D" uuid="2d53b9aa-864c-42f6-bf67-7e39dc6c572e"/>
+					<textElement>
+						<font size="12" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Completed Target]]></text>
+				</staticText>
+				<textField pattern="#,##0.00">
+					<reportElement x="439" y="12" width="91" height="19" forecolor="#3D3D3D" uuid="ff399ed5-1452-453d-ae0c-ad5f52ad890d"/>
+					<textElement textAlignment="Right">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Sub}-$V{Extra}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement x="439" y="31" width="91" height="20" forecolor="#3D3D3D" uuid="3bfb9f5d-2a2f-4a03-b0d6-727c3a048958"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{SalesTarget}==null||$F{SalesTarget}.equals("null")? 0:$F{SalesTarget}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="296" y="73" width="94" height="20" forecolor="#3D3D3D" uuid="18f12e30-004f-4289-8511-4f7af362b139"/>
+					<textElement>
+						<font size="12" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Commission]]></text>
+				</staticText>
+				<line>
+					<reportElement positionType="FixRelativeToBottom" x="-16" y="105" width="585" height="1" uuid="cae19410-c28a-4d30-b512-ccff8510337c"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineColor="#999999"/>
+					</graphicElement>
+				</line>
+				<textField pattern="#,##0.00">
+					<reportElement x="439" y="72" width="91" height="21" forecolor="#3D3D3D" uuid="8207d9c9-8f31-44e3-b6b8-2b8f1d81ed50"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Target}<0 ? 0:$V{Target}*0.01]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement x="439" y="52" width="91" height="20" forecolor="#3D3D3D" uuid="62d976bc-d1f3-40fe-87ea-0c5ab69b7a36"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Target}<0 ? 0:$V{Target}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement key="" mode="Opaque" x="-9" y="-10" width="571" height="65" forecolor="#FFFFFF" backcolor="#308E91" uuid="bf837a77-f836-4378-96fc-d44366f695a6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="20" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COMMISION REPORT EMPLOYEE WISE ]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="38" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="-9" y="6" width="99" height="30" forecolor="#FFFFFF" backcolor="#030303" uuid="c6d23fbe-610e-4c61-b39b-fcee90f617d7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="81367711-fb64-4860-9c6e-e9ce9209043b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Job Type]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="84" y="6" width="99" height="30" forecolor="#FFFFFF" backcolor="#030303" uuid="749a8bc3-3aba-453b-b026-22e3b4fb114b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="81367711-fb64-4860-9c6e-e9ce9209043b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sub Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="179" y="6" width="99" height="30" forecolor="#FFFFFF" backcolor="#030303" uuid="c7e97a83-0fa0-47a8-a1f8-9812608bb1fc">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="81367711-fb64-4860-9c6e-e9ce9209043b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Services]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="270" y="6" width="99" height="30" forecolor="#FFFFFF" backcolor="#030303" uuid="580a86ea-961b-4910-ab32-7c79a7d29a9c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="81367711-fb64-4860-9c6e-e9ce9209043b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Extra Job]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="364" y="6" width="99" height="30" forecolor="#FFFFFF" backcolor="#030303" uuid="79cbda31-7887-4a93-9068-e269bc3c170b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="81367711-fb64-4860-9c6e-e9ce9209043b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Spare Parts]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="463" y="6" width="99" height="30" forecolor="#FFFFFF" backcolor="#030303" uuid="12feb321-ef48-4935-8f62-5ef1a0556582">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="81367711-fb64-4860-9c6e-e9ce9209043b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Commission]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="41" splitType="Stretch">
+			<textField>
+				<reportElement x="2" y="0" width="82" height="30" uuid="68dff539-f47b-4421-91f9-0af7986efc61">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="81367711-fb64-4860-9c6e-e9ce9209043b"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Job_Type}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="84" y="0" width="80" height="30" uuid="070abf9d-cccc-4ab8-abcc-46d96817f0b2">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="2b83c8dc-b557-4b0d-b7d0-afd5ab610ccc"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{subTotal}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="188" y="0" width="70" height="30" uuid="8b014b83-6dfc-4aa8-9d99-75c77f5ecbdb">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="82dfbd55-08db-43b4-a9a9-0f52e2eb640e"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Services1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="274" y="0" width="68" height="30" uuid="29d2ecee-65aa-4c30-a485-63f72a453ab0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="93aa4c3b-800a-4b07-999d-2038f3fbf98a"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Extra_Job}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="357" y="0" width="102" height="30" uuid="22891f43-d0ca-4fd7-91e6-c9cb5ca13b9a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="545d9281-d450-41e2-8ae8-5f235218aea6"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{spare}==null||$F{spare}.equals("null")? 0:$F{spare}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="460" y="0" width="81" height="30" forecolor="#308E91" uuid="dc640801-0ed5-461f-948c-e9c4a7465926"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{comm}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="34" splitType="Stretch">
+			<textField>
+				<reportElement x="180" y="2" width="100" height="30" uuid="ccbc54ce-ac33-421b-af06-d9ebd27e2c53"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="280" y="2" width="100" height="30" uuid="7feae05a-3fd6-4fbe-85a9-79e909986680"/>
+				<textElement textAlignment="Left"/>
+				<textFieldExpression><![CDATA[" of " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

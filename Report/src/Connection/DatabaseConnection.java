@@ -1,47 +1,3 @@
-//package Connection;
-//
-//import java.sql.Connection;
-//import java.sql.SQLException;
-//import java.sql.DriverManager;
-//
-//public class DatabaseConnection {
-//
-//    private static DatabaseConnection instance;
-//    private Connection connection;
-//
-//    public static DatabaseConnection getInstance() {
-//        if (instance == null) {
-//            instance = new DatabaseConnection();
-//        }
-//        return instance;
-//    }
-//
-//    public void connecToDatabase() throws SQLException {
-//
-//        String server = "localhost";
-//        String database = "fsms-data";
-//        String username = "root";
-//        String password = "Lhd1234";
-//        String Port = "3307";
-////        String server = "DS-SVR-PC";
-////        String database = "fsms-data";
-////        String username = "PosUser";
-////        String password = "MasterPos1212";
-//
-//        connection = DriverManager.getConnection("jdbc:mysql://" + server + ":" + Port + "/" + database, username, password);
-//    }
-//
-//    public Connection getConnection() throws SQLException {
-//        if (connection == null) {
-//            connecToDatabase();
-//        }
-//        return connection;
-//    }
-//
-//    public void setConnection(Connection connection) {
-//        this.connection = connection;
-//    }
-//}
 package Connection;
 
 import java.sql.Connection;
@@ -68,18 +24,18 @@ public class DatabaseConnection {
     private void connecToDatabase() throws SQLException {
 //        String server = "FP-SERVER-PC";   
 //        String server = "JANAKA-LAP";
-//        String server = "localhost";
-         String server = "iPC-01";
+        String server = "localhost";
+//        String server = "iPC-01";
 //        String server = "DESKTOP-KT0RRIP";
 //        String database = "data";
         String database = "fsms-data";
 //        String database = "ds";
-//        String username = "PosUser";
-//        String password = "Lhd12345";
+        String username = "PosUser";
+        String password = "Lhd12345";
         String port = "3307";
 //        String server = "DS-SVR-PC";
-        String username = "PosUser";
-        String password = "MasterPos1212";
+//        String username = "PosUser";
+//        String password = "MasterPos1212";
 
         connection = DriverManager.getConnection("jdbc:mysql://" + server + ":" + port + "/" + database, username, password);
     

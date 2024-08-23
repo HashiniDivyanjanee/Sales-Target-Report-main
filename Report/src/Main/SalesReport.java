@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javaswingdev.chart.ModelPieChart;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import java.sql.Connection;
@@ -31,11 +30,6 @@ public class SalesReport extends javax.swing.JFrame {
     private ModelChart modelChart;
 
     public SalesReport() {
-
-        //Start Database Connection
-       
-        //End Database Connection
-
         initComponents();
         
          try {
@@ -524,12 +518,10 @@ public class SalesReport extends javax.swing.JFrame {
     // End Pie Chart
 
     private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
-
         printRecord(panelToPrint);
     }//GEN-LAST:event_btnPrintActionPerformed
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-
         try {
               DatabaseConnection databaseConnection = DatabaseConnection.getInstance();
             Connection connection = databaseConnection.getConnection();
